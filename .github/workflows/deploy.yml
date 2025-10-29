@@ -1,0 +1,37 @@
+name: Build, Test and Deploy API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore src/BugStore.Api/BugStore.Api.csproj
+
+      - name: Build
+        run: dotnet build src/BugStore.Api/BugStore.Api.csproj --configuration Release
+
+      - name: Run tests
+        run: dotnet test src/BugStore.Api/BugStore.Api.csproj --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish src/BugStore.Api/BugStore.Api.csproj -c Release -o publish
+
+      - name: Trigger Render deploy
+        run: |
+          curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{"serviceId":"<srv-d416gce3jp1c73clmc4g>"}' \
+          https://api.render.com/deploy/srv-xxxxxxx
