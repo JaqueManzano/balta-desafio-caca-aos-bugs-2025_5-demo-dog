@@ -7,13 +7,30 @@ using BugStore.Infrastructure.Data;
 using BugStore.Infrastructure.Repositories;
 using BugStore.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
-var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+var envConnection = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(envConnection))
-    connectionString = envConnection;
+{
+    var databaseUri = new Uri(envConnection);
+    var userInfo = databaseUri.UserInfo.Split(':');
+
+    var npgsqlBuilder = new NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = databaseUri.AbsolutePath.TrimStart('/'),
+        SslMode = SslMode.Require,
+        TrustServerCertificate = true
+    };
+
+    connectionString = npgsqlBuilder.ConnectionString;
+}
 
 if (connectionString.Contains("Data Source="))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
@@ -48,15 +65,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
 }
-
 
 app.UseCors("AllowAll");
 
