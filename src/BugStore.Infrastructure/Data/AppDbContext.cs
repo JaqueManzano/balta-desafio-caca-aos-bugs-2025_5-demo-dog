@@ -1,6 +1,7 @@
 ﻿using BugStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Npgsql;
 
 namespace BugStore.Infrastructure.Data
 {
@@ -21,13 +22,27 @@ namespace BugStore.Infrastructure.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+            var databaseUrl = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            if (!string.IsNullOrEmpty(envConnection))
+            if (!string.IsNullOrEmpty(databaseUrl))
             {
-                optionsBuilder.UseNpgsql(envConnection);
+                var databaseUri = new Uri(databaseUrl);
+                var userInfo = databaseUri.UserInfo.Split(':');
+
+                var builder = new NpgsqlConnectionStringBuilder
+                {
+                    Host = databaseUri.Host,
+                    Port = databaseUri.Port,
+                    Username = userInfo[0],
+                    Password = userInfo[1],
+                    Database = databaseUri.AbsolutePath.TrimStart('/'),
+                    SslMode = SslMode.Require,
+                    TrustServerCertificate = true
+                };
+
+                optionsBuilder.UseNpgsql(builder.ConnectionString);
             }
             else
             {
