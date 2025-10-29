@@ -1,4 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BugStore.Domain.Entities;
+
+[Table("OrderLines")]
 
 public class OrderLine
 {
