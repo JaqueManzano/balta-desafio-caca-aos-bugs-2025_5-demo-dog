@@ -32,6 +32,8 @@ if (!string.IsNullOrEmpty(envConnection))
     connectionString = npgsqlBuilder.ConnectionString;
 }
 
+Console.WriteLine("Connection String convertida: " + connectionString);
+
 if (connectionString.Contains("Data Source="))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 else
