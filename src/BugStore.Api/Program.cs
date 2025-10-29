@@ -20,7 +20,6 @@ if (connectionString.Contains("Data Source="))
 else
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<ProductProfle>();
@@ -49,7 +48,19 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); 
+}
+
+
+app.UseCors("AllowAll");
+
+app.MapGet("/", () => "API está no AR!");
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -58,7 +69,19 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-app.UseHttpsRedirection();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        db.Database.EnsureCreated();
+        Console.WriteLine("Banco conectado e tabelas criadas!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Erro ao conectar no banco: " + ex.Message);
+    }
+}
 
 app.MapControllers();
 

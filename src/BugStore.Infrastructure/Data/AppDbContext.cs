@@ -1,4 +1,4 @@
-using BugStore.Domain.Entities;
+﻿using BugStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -21,8 +21,19 @@ namespace BugStore.Infrastructure.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
+            var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=bugstore-app.db");
+
+            if (!string.IsNullOrEmpty(envConnection))
+            {
+                optionsBuilder.UseNpgsql(envConnection);
+            }
+            else
+            {
+                optionsBuilder.UseSqlite("Data Source=bugstore-app.db");
+            }
+
             return new AppDbContext(optionsBuilder.Options);
         }
     }
