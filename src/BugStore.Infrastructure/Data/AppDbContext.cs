@@ -22,7 +22,7 @@ namespace BugStore.Infrastructure.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=app.db");
+            optionsBuilder.UseSqlite("Data Source=bugstore-app.db");
             return new AppDbContext(optionsBuilder.Options);
         }
     }
