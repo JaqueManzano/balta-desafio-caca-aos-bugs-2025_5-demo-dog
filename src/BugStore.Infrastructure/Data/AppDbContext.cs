@@ -28,15 +28,18 @@ namespace BugStore.Infrastructure.Data
 
             if (!string.IsNullOrEmpty(databaseUrl))
             {
+                if (databaseUrl.StartsWith("postgresql://"))
+                    databaseUrl = databaseUrl.Replace("postgresql://", "postgres://");
+
                 var databaseUri = new Uri(databaseUrl);
                 var userInfo = databaseUri.UserInfo.Split(':');
 
                 var builder = new NpgsqlConnectionStringBuilder
                 {
                     Host = databaseUri.Host,
-                    Port = databaseUri.Port,
+                    Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
                     Username = userInfo[0],
-                    Password = userInfo[1],
+                    Password = userInfo.Length > 1 ? userInfo[1] : "",
                     Database = databaseUri.AbsolutePath.TrimStart('/'),
                     SslMode = SslMode.Require,
                     TrustServerCertificate = true

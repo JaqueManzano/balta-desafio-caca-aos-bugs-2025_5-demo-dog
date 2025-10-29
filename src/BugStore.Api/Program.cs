@@ -11,19 +11,23 @@ using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("Default");
-var envConnection = Environment.GetEnvironmentVariable("DATABASE_URL");
+var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+string connectionString = builder.Configuration.GetConnectionString("Default");
+
 if (!string.IsNullOrEmpty(envConnection))
 {
+    if (envConnection.StartsWith("postgresql://"))
+        envConnection = envConnection.Replace("postgresql://", "postgres://");
+
     var databaseUri = new Uri(envConnection);
     var userInfo = databaseUri.UserInfo.Split(':');
 
     var npgsqlBuilder = new NpgsqlConnectionStringBuilder
     {
         Host = databaseUri.Host,
-        Port = databaseUri.Port,
+        Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
         Username = userInfo[0],
-        Password = userInfo[1],
+        Password = userInfo.Length > 1 ? userInfo[1] : "",
         Database = databaseUri.AbsolutePath.TrimStart('/'),
         SslMode = SslMode.Require,
         TrustServerCertificate = true
@@ -38,6 +42,8 @@ if (connectionString.Contains("Data Source="))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 else
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+
+
 
 builder.Services.AddAutoMapper(cfg =>
 {
