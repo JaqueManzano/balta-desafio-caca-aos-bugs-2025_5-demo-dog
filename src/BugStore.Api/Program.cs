@@ -36,14 +36,10 @@ if (!string.IsNullOrEmpty(envConnection))
     connectionString = npgsqlBuilder.ConnectionString;
 }
 
-Console.WriteLine("Connection String convertida: " + connectionString);
-
 if (connectionString.Contains("Data Source="))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 else
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
-
-
 
 builder.Services.AddAutoMapper(cfg =>
 {
@@ -78,7 +74,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    db.Database.Migrate(); 
 }
 
 app.UseCors("AllowAll");
@@ -91,20 +87,6 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "BugStore API v1");
     options.RoutePrefix = string.Empty;
 });
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    try
-    {
-        db.Database.EnsureCreated();
-        Console.WriteLine("Banco conectado e tabelas criadas!");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Erro ao conectar no banco: " + ex.Message);
-    }
-}
 
 app.MapControllers();
 
