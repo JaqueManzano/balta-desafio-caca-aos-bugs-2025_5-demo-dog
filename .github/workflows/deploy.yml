@@ -19,18 +19,17 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore src/BugStore.Api/BugStore.Api.csproj
 
-
       - name: Build
         run: dotnet build src/BugStore.Api/BugStore.Api.csproj --configuration Release
 
       - name: Run all tests
         run: |
           for proj in src/**/*.csproj; do
-            if [[ $proj == *".Tests.csproj" ]]; then
-              echo "Running tests for $proj"
-              dotnet test $proj --no-build --verbosity normal
-            fi
-          done
+             if [[ $proj == *".Tests.csproj" ]]; then
+               echo "Running tests for $proj"
+               dotnet test $proj --verbosity normal
+             fi
+           done
 
       - name: Publish API
         run: dotnet publish src/BugStore.Api/BugStore.Api.csproj -c Release -o publish
