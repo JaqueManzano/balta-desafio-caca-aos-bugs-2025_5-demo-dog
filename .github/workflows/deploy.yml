@@ -22,11 +22,17 @@ jobs:
       - name: Build
         run: dotnet build BugStore.sln --configuration Release
 
-      - name: Run tests
-        run: dotnet test BugStore.sln --no-build --verbosity normal
+      - name: Run all tests
+        run: |
+          for proj in src/**/*.csproj; do
+            if [[ $proj == *".Tests.csproj" ]]; then
+              echo "Running tests for $proj"
+              dotnet test $proj --no-build --verbosity normal
+            fi
+          done
 
       - name: Publish API
-        run: dotnet publish src/BugStore.Api/BugStore.Api.csproj -c Release -o publish
+        run: dotnet publish src/BugStore.Api/.csproj -c Release -o publish
 
       - name: Trigger Render deploy
         run: |
