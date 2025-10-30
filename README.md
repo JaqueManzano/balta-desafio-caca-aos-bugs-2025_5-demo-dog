@@ -26,3 +26,5 @@ Banco de Dados.
 
 ### Veja meu progresso no desafio
 [Incluir link para o repositório central]
+
+Link da versão publicada: https://balta-desafio-caca-aos-bugs-2025-5-demo.onrender.com/index.html
