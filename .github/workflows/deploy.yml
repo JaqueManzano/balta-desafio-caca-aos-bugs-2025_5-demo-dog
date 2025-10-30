@@ -33,7 +33,7 @@ jobs:
           done
 
       - name: Publish API
-        run: dotnet publish src/BugStore.Api/.csproj -c Release -o publish
+        run: dotnet publish src/BugStore.Api/BugStore.Api.csproj -c Release -o publish
 
       - name: Trigger Render deploy
         run: |
