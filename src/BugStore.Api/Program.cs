@@ -73,8 +73,6 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-app.MapGet("/", () => "API está no AR!");
-
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
